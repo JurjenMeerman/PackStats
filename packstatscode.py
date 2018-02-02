@@ -14,7 +14,7 @@ matplotlib.style.use('ggplot')
 ########## Change the path of the filename to your whatsapp textfile and you are good to go##############
 
 
-filename = r'//solon.prd/files/P/Global/Users/C36116/UserData/Desktop/Project/Packstats/WhatsApp4.txt'
+filename = r'//..../WhatsApp4.txt'
 f = open(filename, encoding="utf8")
 file_read = f.read()
 #'24-01-18, 14:45 - ' %* '\n'
