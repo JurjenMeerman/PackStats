@@ -74,8 +74,8 @@ df['Time'] =  pd.to_datetime(df['Time'], format='%H:%M').dt.time
 
 poah = []
 for i in range(len(df["Message"])):
-    mydog = re.compile(r'(?:^|\s)(Poa\w+)|(?:^|\s)(Pooa\w+)|(?:^|\s)(Pooo\w+)|(?:^|\s)(Piu\w+)',re.IGNORECASE)
-    poah.append(bool(mydog.findall(df["Message"].iloc[i])))
+    mydogshit = re.compile(r'(?:^|\s)(Poa\w+)|(?:^|\s)(Pooa\w+)|(?:^|\s)(Pooo\w+)|(?:^|\s)(Piu\w+)',re.IGNORECASE)
+    poah.append(bool(mydogshit.findall(df["Message"].iloc[i])))
     
 df["poah"] = poah
 df["poah"] = df["poah"]*1
