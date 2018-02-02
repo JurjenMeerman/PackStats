@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+import seaborn as sns
 
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
@@ -14,7 +15,7 @@ matplotlib.style.use('ggplot')
 ########## Change the path of the filename to your whatsapp textfile and you are good to go##############
 
 
-filename = r'//..../WhatsApp4.txt'
+filename = r'//solon.prd/files/P/Global/Users/C36116/UserData/Desktop/Project/Packstats/WhatsApp4.txt'
 f = open(filename, encoding="utf8")
 file_read = f.read()
 #'24-01-18, 14:45 - ' %* '\n'
@@ -92,10 +93,29 @@ df_counts["count"] = 1
 df_counts = pd.DataFrame({'count' : df_counts.groupby( [ 'Date', 'Name'] ).size()}).reset_index()
 
 df_daily = df_counts.pivot_table(index='Date',columns='Name',aggfunc=sum)
+df_daily.columns = df_daily.columns.droplevel()
 df_daily = df_daily.fillna(0)
 df_daily["Total"] = df_daily.sum(axis=1)
 
-df_daily.plot()
-plt.show()
 
+df_daily["Total"].plot()
+df_daily.drop("Total", axis=1).plot()
 
+#correlation matrix to see who responds to who
+corr = df_daily.drop("Total", axis=1).corr()
+sns.cubehelix_palette(as_cmap=True, reverse=True)
+sns.heatmap(corr, 
+            xticklabels=corr.columns.values,
+            yticklabels=corr.columns.values,
+            cmap="YlGnBu")
+
+#### Poah's over time
+
+df_poah = df[['Date',"Name", "poah"]] 
+df_poah = df_poah.pivot_table(index='Date',columns='Name',aggfunc=sum)
+df_poah.columns = df_poah.columns.droplevel()
+df_poah = df_poah.fillna(0)
+df_poah["Total"] = df_poah.sum(axis=1)
+
+df_poah.plot()
+df_poah.drop("Total", axis=1).plot()
