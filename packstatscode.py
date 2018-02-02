@@ -14,7 +14,7 @@ matplotlib.style.use('ggplot')
 ########## Change the path of the filename to your whatsapp textfile and you are good to go##############
 
 
-filename = r'//..../WhatsApp4.txt'
+filename = r'//solon.prd/files/P/Global/Users/C36116/UserData/Desktop/Project/Packstats/WhatsApp4.txt'
 f = open(filename, encoding="utf8")
 file_read = f.read()
 #'24-01-18, 14:45 - ' %* '\n'
@@ -71,9 +71,17 @@ df = df.dropna(axis=0)
 df['Date'] =  pd.to_datetime(df['Date'], format='%d-%m-%y').dt.date
 df['Time'] =  pd.to_datetime(df['Time'], format='%H:%M').dt.time
 
-#Selecting current month data
 
-today_date = datetime.today().date()
+poah = []
+for i in range(len(df["Message"])):
+    mydog = re.compile(r'(?:^|\s)(Poa\w+)|(?:^|\s)(Pooa\w+)|(?:^|\s)(Pooo\w+)|(?:^|\s)(Piu\w+)',re.IGNORECASE)
+    poah.append(bool(mydog.findall(df["Message"].iloc[i])))
+    
+df["poah"] = poah
+df["poah"] = df["poah"]*1
+
+#Selecting the latest data month from whatsapp
+today_date = df['Date'].max()
 one_month_ago = today_date - relativedelta(months=1)
 #one_month_ago = one_month_ago.date()
 
@@ -88,3 +96,6 @@ df_daily = df_daily.fillna(0)
 df_daily["Total"] = df_daily.sum(axis=1)
 
 df_daily.plot()
+plt.show()
+
+
