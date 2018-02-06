@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Feb  6 10:13:01 2018
+
+@author: C36116
+"""
+
 import re
 import numpy as np
 import pandas as pd
@@ -10,7 +17,7 @@ from datetime import datetime
 
 matplotlib.style.use('ggplot')
 
-filename = r'C:/Python/WhatsApp4.txt'
+filename = r'//solon.prd/files/P/Global/Users/C36116/UserData/Desktop/Project/Packstats/WhatsApp4.txt'
 f = open(filename, encoding="utf8")
 file_read = f.read()
 #'24-01-18, 14:45 - ' %* '\n'
@@ -151,3 +158,36 @@ totalmonthlypacker['pctg_monthly_msg'] = totalmonthlypacker['Message']/totalmont
 for packer in list(totalmonthlypacker['Name'].unique()):
     totalmonthlypacker['pctg_monthly_msg'].loc[totalmonthlypacker['Name']==packer].plot(kind='bar',figsize=(10,10), title=packer+' %msg per month',width=0.89)
     plt.show()
+
+### Predictive Modelling
+
+from fbprophet import Prophet
+%matplotlib auto
+
+df_predict = df_counts[["Date", "count"]]
+df_predict['Date'] = pd.DatetimeIndex(df_predict['Date'])
+
+
+df_predict = df_predict.rename(columns={'Date': 'ds',
+                        'count': 'y'})
+
+
+
+ax = df_predict.set_index('ds').plot(figsize=(12, 8))
+ax.set_ylabel('Monthly Number of Messages')
+ax.set_xlabel('Date')
+
+plt.show()
+
+my_model = Prophet(interval_width=0.50)
+my_model.fit(df_predict)
+
+future_dates = my_model.make_future_dataframe(periods=30)
+
+
+forecast = my_model.predict(future_dates)
+forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
+
+my_model.plot(forecast,
+              uncertainty=True)
+my_model.plot_components(forecast)
