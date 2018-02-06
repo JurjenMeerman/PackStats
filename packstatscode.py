@@ -73,7 +73,7 @@ def getdataframe(providelist):
     return df
 
 
-def wordspotter(df,listofterms): ## provide a dataframe, lists of terms, and colum
+def wordspotter(df,listofterms): ## provide a dataframe, lists of terms
     finalregex = ''
     for term in listofterms: ##prepare the regex string iteratively by adding the terms and wrapping them
         if term != listofterms[-1]: ## do not include "|" (pipe) in the last bit
