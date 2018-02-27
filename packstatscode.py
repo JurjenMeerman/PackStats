@@ -17,7 +17,7 @@ from datetime import datetime
 
 matplotlib.style.use('ggplot')
 
-filename = r'//solon.prd/files/P/Global/Users/C36116/UserData/Desktop/Project/Packstats/WhatsApp4.txt'
+filename = r'//...../WhatsApp5.txt'
 f = open(filename, encoding="utf8")
 file_read = f.read()
 #'24-01-18, 14:45 - ' %* '\n'
@@ -95,9 +95,7 @@ def wordspotter(df,listofterms): ## provide a dataframe, lists of terms
     return booleanchecks ## return a list of bools
 
 
-    
-
-
+ 
 
 df = getdataframe(pieces)
 
@@ -112,8 +110,19 @@ df_poah.columns = df_poah.columns.droplevel()
 df_poah = df_poah.fillna(0)
 df_poah["Total"] = df_poah.sum(axis=1)
 
-df_poah.plot()
+df_poah["Total"].plot()
 df_poah.drop("Total", axis=1).plot()
+#Full historic Data plots
+
+df_full = df[['Date', "Time","Name"]] 
+df_full["count"] = 1
+df_full = pd.DataFrame({'count' : df_full.groupby( [ 'Date', 'Name'] ).size()}).reset_index()
+df_full = df_full.pivot_table(index='Date',columns='Name',aggfunc=sum)
+df_full.columns = df_full.columns.droplevel()
+df_full = df_full.fillna(0)
+df_full["Total"] = df_full.sum(axis=1)
+df_full["Total"].plot()
+df_full.drop("Total", axis=1).plot()
 
 
 #Selecting the latest data month from whatsapp
@@ -135,6 +144,17 @@ df_daily["Total"] = df_daily.sum(axis=1)
 df_daily["Total"].plot()
 df_daily.drop("Total", axis=1).plot()
 
+
+
+df_monthly_poah = df_monthly[['Date',"Name", "poah"]] 
+df_monthly_poah = df_monthly_poah.pivot_table(index='Date',columns='Name',aggfunc=sum)
+df_monthly_poah.columns = df_monthly_poah.columns.droplevel()
+df_monthly_poah = df_monthly_poah.fillna(0)
+df_monthly_poah["Total"] = df_monthly_poah.sum(axis=1)
+
+df_monthly_poah["Total"].plot()
+df_monthly_poah.drop("Total", axis=1).plot()
+
 #correlation matrix to see who responds to who
 corr = df_daily.drop("Total", axis=1).corr()
 sns.cubehelix_palette(as_cmap=True, reverse=True)
@@ -142,7 +162,9 @@ sns.heatmap(corr,
             xticklabels=corr.columns.values,
             yticklabels=corr.columns.values,
             cmap="YlGnBu")
-
+plt.yticks(rotation=45) 
+plt.xticks(rotation=25) 
+plt.show()
 
 
 
@@ -155,9 +177,26 @@ totalmonthly = pd.pivot_table(df,values=['Message'],index=['Month'],aggfunc='cou
 totalmonthlypacker = totalmonthlypacker.join(totalmonthly,rsuffix=' total') ## join totals to packer to calc %
 totalmonthlypacker['pctg_monthly_msg'] = totalmonthlypacker['Message']/totalmonthlypacker['Message total'] ##calc %
 
-for packer in list(totalmonthlypacker['Name'].unique()):
-    totalmonthlypacker['pctg_monthly_msg'].loc[totalmonthlypacker['Name']==packer].plot(kind='bar',figsize=(10,10), title=packer+' %msg per month',width=0.89)
-    plt.show()
+totalmonthlypacker_2 = totalmonthlypacker[["Name","Message", "pctg_monthly_msg"]].tail(6)
+
+y = list(totalmonthlypacker_2["Message"].values)
+N = len(y)
+x = list(totalmonthlypacker_2["Name"].values)
+width = 1/1.5
+plt.bar(x, y, width)
+
+
+y = list(totalmonthlypacker_2["pctg_monthly_msg"].values)
+N = len(y)
+x = list(totalmonthlypacker_2["Name"].values)
+width = 1/1.5
+plt.bar(x, y, width)
+
+
+
+#for packer in list(totalmonthlypacker['Name'].unique()):
+#    totalmonthlypacker['pctg_monthly_msg'].loc[totalmonthlypacker['Name']==packer].plot(kind='bar',figsize=(12,12), title=packer+' %msg per month',width=0.75)
+#    plt.show()
 
 ### Predictive Modelling
 
@@ -191,3 +230,28 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
 my_model.plot(forecast,
               uncertainty=True)
 my_model.plot_components(forecast)
+
+df_coins = df.copy()
+df_coins['coin'] = wordspotter(df,['coin','bitcoin','dennis','ark', 'shitcoin', 'btc', 'ripple', 'xrp','stellar', 'xlm', 'alt' ]) ## passing a df and list to my function above
+df_coins['coin'] = df_coins['coin']*1 ## changing bools to 0/1
+
+df_coins = df_coins[['Date',"Name", "coin"]] 
+df_coins = df_coins.pivot_table(index='Date',columns='Name',aggfunc=sum)
+df_coins.columns = df_coins.columns.droplevel()
+df_coins = df_coins.fillna(0)
+df_coins["Total"] = df_coins.sum(axis=1)
+
+df_coins["Total"].plot()
+df_coins.drop("Total", axis=1).plot()
+
+#Share of POAHS's per month
+
+df_relative = pd.DataFrame(
+    {'Total all msg': list(df_full["Total"].values),
+     'Total Poah': list(df_poah["Total"].values)
+    })
+
+
+df_relative = df_relative.set_index(df_full.index)
+df_relative["Relative"] =  df_relative["Total Poah"]/df_relative["Total all msg"]
+df_relative["Relative"].plot()
